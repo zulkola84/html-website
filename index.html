@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flashcard Ibu Negeri & Bandar Diraja</title>
+<style>
+  :root {
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --text: #1d2433;
+    --muted: #6b7385;
+    --accent: #2563eb;
+    --accent-2: #0ea5e9;
+    --border: #dfe4ee;
+    --shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1420;
+      --card: #1a2233;
+      --text: #e7ecf5;
+      --muted: #97a1b5;
+      --accent: #60a5fa;
+      --accent-2: #38bdf8;
+      --border: #2a3450;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1420;
+    --card: #1a2233;
+    --text: #e7ecf5;
+    --muted: #97a1b5;
+    --accent: #60a5fa;
+    --accent-2: #38bdf8;
+    --border: #2a3450;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 40px;
+  }
+  h1 {
+    margin: 0 0 4px;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    text-align: center;
+  }
+  .sub {
+    margin: 0 0 20px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    text-align: center;
+  }
+  .progress {
+    width: min(480px, 100%);
+    margin-bottom: 18px;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width 0.3s ease;
+  }
+
+  .scene {
+    width: min(480px, 100%);
+    height: 300px;
+    perspective: 1200px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.55s cubic-bezier(.4,.2,.2,1);
+    transform-style: preserve-3d;
+  }
+  .scene.flipped .card { transform: rotateY(180deg); }
+  .face {
+    position: absolute;
+    inset: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .face.back { transform: rotateY(180deg); }
+  .label {
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .state {
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    font-weight: 800;
+    margin: 0;
+  }
+  .answer {
+    font-size: clamp(1.2rem, 5vw, 1.6rem);
+    font-weight: 700;
+    margin: 0 0 14px;
+  }
+  .answer.none { color: var(--muted); font-style: italic; font-weight: 500; }
+  .hint {
+    position: absolute;
+    bottom: 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button {
+    font: inherit;
+    font-size: 0.95rem;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    min-width: 96px;
+  }
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 2px; }
+
+  .counter {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .list {
+    width: min(480px, 100%);
+    margin-top: 28px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .list summary {
+    padding: 12px 16px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .list table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+  .list th, .list td {
+    text-align: left;
+    padding: 9px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .list th { color: var(--muted); font-weight: 600; }
+
+  @media (max-width: 400px) {
+    .scene { height: 320px; }
+    .face { padding: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Flashcard Ibu Negeri &amp; Bandar Diraja</h1>
+<p class="sub">Klik kad untuk melihat jawapan. Gunakan anak panah ← → pada papan kekunci.</p>
+
+<div class="progress">
+  <div class="progress-meta">
+    <span id="progressText">Kad 1 / 16</span>
+    <span id="scoreText"></span>
+  </div>
+  <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+</div>
+
+<div class="scene" id="scene" role="button" tabindex="0" aria-label="Klik untuk balik kad">
+  <div class="card">
+    <div class="face front">
+      <div class="label">Negeri / Wilayah</div>
+      <p class="state" id="stateName"></p>
+      <div class="hint">Klik untuk jawapan</div>
+    </div>
+    <div class="face back">
+      <div class="label">Ibu negeri</div>
+      <p class="answer" id="capital"></p>
+      <div class="label" style="margin-top:12px">Bandar diraja</div>
+      <p class="answer" id="royal"></p>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="prevBtn">← Sebelum</button>
+  <button id="shuffleBtn">Kocok</button>
+  <button id="nextBtn" class="primary">Seterusnya →</button>
+</div>
+<div class="counter" id="counter"></div>
+
+<details class="list">
+  <summary>Senarai semua jawapan</summary>
+  <table>
+    <thead><tr><th>Negeri / Wilayah</th><th>Ibu negeri</th><th>Bandar diraja</th></tr></thead>
+    <tbody id="listBody"></tbody>
+  </table>
+</details>
+
+<script>
+  const NONE = "Tiada bandar diraja";
+
+  // Ibu negeri / pusat pentadbiran dan bandar diraja bagi setiap negeri & wilayah persekutuan
+  const cards = [
+    { name: "Johor",                 capital: "Johor Bahru",     royal: "Johor Bahru" },
+    { name: "Kedah",                 capital: "Alor Setar",      royal: "Alor Setar" },
+    { name: "Kelantan",              capital: "Kota Bharu",      royal: "Kota Bharu" },
+    { name: "Melaka",                capital: "Melaka",          royal: NONE },
+    { name: "Negeri Sembilan",       capital: "Seremban",        royal: "Seri Menanti" },
+    { name: "Pahang",                capital: "Kuantan",         royal: "Pekan" },
+    { name: "Pulau Pinang",          capital: "George Town",     royal: NONE },
+    { name: "Perak",                 capital: "Ipoh",            royal: "Kuala Kangsar" },
+    { name: "Perlis",                capital: "Kangar",          royal: "Arau" },
+    { name: "Selangor",              capital: "Shah Alam",       royal: "Klang" },
+    { name: "Terengganu",            capital: "Kuala Terengganu", royal: "Kuala Terengganu" },
+    { name: "Sabah",                 capital: "Kota Kinabalu",   royal: NONE },
+    { name: "Sarawak",               capital: "Kuching",         royal: NONE },
+    { name: "Wilayah Persekutuan Kuala Lumpur", capital: "Kuala Lumpur", royal: NONE },
+    { name: "Wilayah Persekutuan Labuan",       capital: "Victoria",     royal: NONE },
+    { name: "Wilayah Persekutuan Putrajaya",    capital: "Putrajaya",    royal: NONE }
+  ];
+
+  let deck = cards.slice();
+  let index = 0;
+  let flipped = false;
+
+  const scene = document.getElementById("scene");
+  const stateName = document.getElementById("stateName");
+  const capital = document.getElementById("capital");
+  const royal = document.getElementById("royal");
+  const progressText = document.getElementById("progressText");
+  const counter = document.getElementById("counter");
+  const barFill = document.getElementById("barFill");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const shuffleBtn = document.getElementById("shuffleBtn");
+  const listBody = document.getElementById("listBody");
+
+  function render() {
+    const c = deck[index];
+    stateName.textContent = c.name;
+    capital.textContent = c.capital;
+    royal.textContent = c.royal;
+    royal.classList.toggle("none", c.royal === NONE);
+
+    scene.classList.toggle("flipped", flipped);
+    progressText.textContent = `Kad ${index + 1} / ${deck.length}`;
+    counter.textContent = `${index + 1} daripada ${deck.length}`;
+    barFill.style.width = `${((index + 1) / deck.length) * 100}%`;
+    prevBtn.disabled = index === 0;
+    nextBtn.disabled = index === deck.length - 1;
+  }
+
+  function flip() {
+    flipped = !flipped;
+    scene.classList.toggle("flipped", flipped);
+  }
+
+  function go(step) {
+    const next = index + step;
+    if (next < 0 || next >= deck.length) return;
+    index = next;
+    flipped = false;
+    render();
+  }
+
+  function shuffle() {
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    index = 0;
+    flipped = false;
+    render();
+  }
+
+  scene.addEventListener("click", flip);
+  scene.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); }
+  });
+  prevBtn.addEventListener("click", () => go(-1));
+  nextBtn.addEventListener("click", () => go(1));
+  shuffleBtn.addEventListener("click", shuffle);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "BUTTON") return;
+    if (e.key === "ArrowRight") go(1);
+    else if (e.key === "ArrowLeft") go(-1);
+  });
+
+  // Isi jadual rujukan
+  listBody.innerHTML = cards.map(c =>
+    `<tr><td>${c.name}</td><td>${c.capital}</td><td>${c.royal === NONE ? `<em>${NONE}</em>` : c.royal}</td></tr>`
+  ).join("");
+
+  render();
+</script>
+</body>
+</html>
