@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Semakan Kehadiran Pelajar</title>
+<style>
+:root {
+  --teal: #0b7470; --teal-d: #095a57; --ink: #14302f; --muted: #5b6f6e; --line: #d8e4e3; --bg: #f4f8f8; --surface: #ffffff;
+  --ok: #1d8a4e; --ok-bg: #e3f4ea; --bad: #c0392b; --bad-bg: #fbe6e3; --warn: #b7791f; --warn-bg: #fdf1d9; --info: #2b6cb0; --info-bg: #e5eefa; --none-bg: #eceff0;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ink: #e6f1f0; --muted: #9db3b1; --line: #2c4442; --bg: #0f1c1b; --surface: #162826; --ok-bg: #173a27; --bad-bg: #4a211c; --warn-bg: #4a3812; --info-bg: #172f4a; --none-bg: #243433; --teal: #2aa59f; --teal-d: #2aa59f; --ok: #5fd08b; --bad: #ff8a7a; --warn: #f0c06a; --info: #7db4ee; }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.5; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 16px; }
+header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.mark { width: 42px; height: 42px; border-radius: 10px; background: var(--teal); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 1.2rem; flex: none; }
+h1 { font-size: 1.25rem; margin: 0; }
+.sub { color: var(--muted); font-size: .88rem; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+form { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+.field { flex: 1 1 220px; }
+label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 4px; }
+input { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); text-transform: uppercase; }
+input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+button, .btn { font: inherit; font-weight: 600; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--teal); background: var(--teal); color: #fff; cursor: pointer; text-decoration: none; display: inline-block; }
+button:disabled { opacity: .6; cursor: wait; }
+.btn.ghost { background: transparent; color: var(--teal); }
+.hint { font-size: .82rem; color: var(--muted); margin: 8px 0 0; }
+.msg { padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; font-size: .95rem; }
+.msg.err { background: var(--bad-bg); color: var(--bad); }
+.msg.info { background: var(--info-bg); color: var(--info); }
+.who { font-size: 1.05rem; font-weight: 700; margin: 0 0 2px; }
+.cls-h { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; margin-bottom: 10px; }
+.cls-h h2 { font-size: 1.05rem; margin: 0; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin: 10px 0 12px; }
+.kpi { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.kpi b { display: block; font-size: 1.4rem; line-height: 1.2; }
+.kpi span { font-size: .78rem; color: var(--muted); }
+.kpi.pct b { color: var(--ok); } .kpi.pct.low b { color: var(--bad); }
+.bar { height: 8px; border-radius: 99px; background: var(--none-bg); overflow: hidden; margin-bottom: 4px; }
+.bar > i { display: block; height: 100%; background: var(--ok); }
+.bar.low > i { background: var(--bad); }
+.warn { background: var(--warn-bg); color: var(--warn); padding: 8px 12px; border-radius: 8px; font-size: .88rem; margin-bottom: 10px; }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+.b { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: .8rem; font-weight: 600; white-space: nowrap; }
+.b.H { background: var(--ok-bg); color: var(--ok); } .b.TH { background: var(--bad-bg); color: var(--bad); }
+.b.S { background: var(--info-bg); color: var(--info); } .b.L { background: var(--warn-bg); color: var(--warn); }
+.b.N { background: var(--none-bg); color: var(--muted); }
+td.sesi { color: var(--muted); }
+.mk-h { font-size: 1rem; margin: 14px 0 6px; }
+.b.hi { background: var(--ok-bg); color: var(--ok); } .b.mid { background: var(--warn-bg); color: var(--warn); } .b.lo { background: var(--bad-bg); color: var(--bad); }
+td.n, th.n { text-align: right; white-space: nowrap; }
+td.rep a { font-size: .8rem; color: var(--teal); }
+.notice { border-left: 4px solid var(--teal); }
+.notice h3 { margin: 0 0 4px; font-size: 1rem; }
+.notice p { margin: 0 0 10px; font-size: .92rem; }
+.scroll { overflow-x: auto; }
+footer { color: var(--muted); font-size: .78rem; text-align: center; padding: 8px 0 16px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mark" aria-hidden="true">H</div>
+    <div>
+      <h1>Semakan Kehadiran Pelajar</h1>
+      <div class="sub">Masukkan No. Matrik / ID pelajar anda untuk melihat rekod kehadiran dan markah assessment.</div>
+    </div>
+  </header>
+
+  <section class="card">
+    <form id="f" autocomplete="off">
+      <div class="field">
+        <label for="id">No. Matrik / ID Pelajar</label>
+        <input id="id" name="id" type="text" inputmode="text" maxlength="30" placeholder="cth. CA24001" required>
+      </div>
+      <button id="go" type="submit">Semak</button>
+    </form>
+    <p class="hint">Hanya rekod kehadiran dan markah anda sendiri akan dipaparkan.</p>
+  </section>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+  <div id="out"></div>
+
+  <section class="card notice" id="notice" hidden>
+    <h3>Maklumat tidak betul?</h3>
+    <p>Jika status kehadiran atau maklumat anda tidak betul, sila kemas kini bersama pensyarah berkaitan dengan bukti sokongan (contohnya surat sakit) <b>secepat mungkin</b>.</p>
+    <a class="btn" id="mail-general" href="#">Hubungi pensyarah melalui e-mel</a>
+  </section>
+
+  <footer>Rekod dikemas kini oleh pensyarah selepas setiap sesi. Jika baru sahaja hadir, rekod mungkin belum dimasukkan.</footer>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ====== TETAPAN (ubah di sini sahaja) ====== */
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw-77OIwZKzaJDbIQfZCrm7alsCi58n5Wj1-SfcO0OTcoJqRn3prvMXS4MuQn07ovtXYQ/exec';
+const EMEL_PENSYARAH = 'kifli@umpsa.edu.my';
+const AMBANG = 80; // peratus kehadiran minimum
+
+const LABEL = { H: 'Hadir', TH: 'Tidak Hadir', S: 'Sakit', L: 'Lain-lain' };
+const $ = s => document.querySelector(s);
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = s => { try { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('ms-MY', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return s; } };
+
+let current = null; // { id, nama }
+
+function mailto(subject, body) {
+  return 'mailto:' + EMEL_PENSYARAH + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+function show(msg, kind) { $('#msg').innerHTML = msg ? '<div class="msg ' + kind + '">' + esc(msg) + '</div>' : ''; }
+
+function markahHTML(k) {
+  const m = k.markah || [];
+  let h = '<h3 class="mk-h">Markah Assessment</h3>';
+  if (!m.length) return h + '<p class="sub">Belum ada markah dikeluarkan untuk kelas ini.</p>';
+  const hasW = m.some(x => x.wajaran);
+  const r1 = v => Math.round(v * 100) / 100;
+  let csum = 0, wused = 0;
+  h += '<div class="scroll"><table><thead><tr><th>Assessment</th><th class="n">Markah</th><th class="n">' + (hasW ? 'Carry Marks' : 'Peratus') + '</th></tr></thead><tbody>';
+  m.forEach(x => {
+    const pct = x.penuh ? x.markah / x.penuh * 100 : null;
+    const cls = pct == null ? 'N' : pct >= 70 ? 'hi' : pct >= 50 ? 'mid' : 'lo';
+    let last;
+    if (hasW) {
+      const c = x.carry != null ? x.carry : (x.wajaran && pct != null ? pct * x.wajaran / 100 : null);
+      if (c != null) { csum += c; wused += x.wajaran; }
+      last = c == null ? '' : '<b>' + esc(r1(c)) + '</b> / ' + esc(x.wajaran) + '%';
+    } else last = pct == null ? '' : Math.round(pct) + '%';
+    h += '<tr><td>' + esc(x.nama) + '</td><td class="n"><span class="b ' + cls + '">' + esc(r1(x.markah)) + ' / ' + esc(x.penuh) + '</span></td><td class="n">' + last + '</td></tr>';
+  });
+  h += '</tbody></table></div>';
+  if (hasW && wused) h += '<p class="hint">Jumlah Carry Marks setakat ini: <b>' + r1(csum) + ' / ' + wused + '%</b> (assessment yang sudah dikeluarkan sahaja).</p>';
+  return h;
+}
+
+function render(data) {
+  const out = $('#out');
+  current = { id: data.id, nama: data.kelas[0].pelajar };
+  let html = '<div class="card"><p class="who">' + esc(current.nama) + '</p><div class="sub">' + esc(data.id) + ' · ' + data.kelas.length + ' kelas</div></div>';
+  data.kelas.forEach((k, ki) => {
+    const jumlah = k.jumlah;
+    const pct = jumlah ? Math.round(k.kira.H / jumlah * 100) : null;
+    const low = pct != null && pct < AMBANG;
+    html += '<section class="card"><div class="cls-h"><h2>' + esc(k.kod) + (k.kumpulan ? ' · Kumpulan ' + esc(k.kumpulan) : '') + ' — ' + esc(k.nama) + '</h2>' +
+      '<span class="sub">' + esc(k.pensyarah) + (k.semester ? ' · ' + esc(k.semester) : '') + '</span></div>';
+    if (!jumlah) {
+      html += '<p class="sub">Belum ada sesi direkod untuk kelas ini.</p>' + markahHTML(k) + '</section>';
+      return;
+    }
+    html += '<div class="bar' + (low ? ' low' : '') + '" role="img" aria-label="Kehadiran ' + pct + ' peratus"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="kpis">' +
+      '<div class="kpi pct' + (low ? ' low' : '') + '"><b>' + pct + '%</b><span>Kehadiran (' + k.kira.H + ' / ' + jumlah + ' sesi)</span></div>' +
+      '<div class="kpi"><b>' + k.kira.H + '</b><span>Hadir</span></div>' +
+      '<div class="kpi"><b>' + k.kira.TH + '</b><span>Tidak hadir</span></div>' +
+      '<div class="kpi"><b>' + k.kira.S + '</b><span>Sakit</span></div>' +
+      '<div class="kpi"><b>' + k.kira.L + '</b><span>Lain-lain</span></div>' +
+      '</div>';
+    if (low) html += '<div class="warn">Kehadiran anda di bawah ' + AMBANG + '%. Sila berbincang dengan pensyarah.</div>';
+    html += '<div class="scroll"><table><thead><tr><th>Tarikh</th><th>Status</th><th>Catatan</th><th>Catatan sesi</th><th></th></tr></thead><tbody>';
+    k.rekod.forEach((r, ri) => {
+      const st = r.status && LABEL[r.status] ? r.status : 'N';
+      const subj = 'Pembetulan kehadiran ' + k.kod + (k.kumpulan ? ' (' + k.kumpulan + ')' : '') + ' - ' + data.id;
+      const body = 'Assalamualaikum / Salam sejahtera,\n\nSaya ' + current.nama + ' (' + data.id + ') ingin memohon semakan kehadiran:\n' +
+        'Kelas: ' + k.kod + ' ' + k.nama + (k.kumpulan ? ' (Kumpulan ' + k.kumpulan + ')' : '') + '\n' +
+        'Tarikh: ' + r.tarikh + '\nStatus dalam rekod: ' + (LABEL[r.status] || 'Tiada rekod') + '\n' +
+        'Status sebenar: \nSebab / bukti sokongan: \n\nTerima kasih.';
+      html += '<tr><td>' + esc(fmt(r.tarikh)) + '</td><td><span class="b ' + st + '">' + esc(LABEL[r.status] || 'Tiada rekod') + '</span></td><td>' + esc(r.catatan) + '</td><td class="sesi">' + esc(r.sesi) + '</td>' +
+        '<td class="rep"><a href="' + esc(mailto(subj, body)) + '">Tidak betul?</a></td></tr>';
+    });
+    html += '</tbody></table></div>' + markahHTML(k) + '</section>';
+  });
+  out.innerHTML = html;
+  const g = mailto('Semakan kehadiran - ' + data.id, 'Salam sejahtera,\n\nSaya ' + current.nama + ' (' + data.id + ') ingin berbincang mengenai rekod kehadiran saya.\n\nTerima kasih.');
+  $('#mail-general').href = g;
+  $('#notice').hidden = false;
+}
+
+async function check(id) {
+  const btn = $('#go');
+  show('', ''); $('#out').innerHTML = ''; $('#notice').hidden = true;
+  btn.disabled = true; btn.textContent = 'Menyemak…';
+  try {
+    const r = await fetch(SHEET_URL + '?aksi=semak&id=' + encodeURIComponent(id), { redirect: 'follow' });
+    const j = await r.json();
+    if (!j.ok) { show(j.error === 'ID tidak sah' ? 'ID tidak sah. Sila masukkan No. Matrik penuh.' : 'Ralat sistem. Cuba lagi sebentar nanti.', 'err'); return; }
+    if (!j.jumpa) {
+      show('ID tidak dijumpai dalam senarai kelas. Semak ejaan ID anda. Jika betul, sila hubungi pensyarah supaya nama anda ditambah.', 'err');
+      $('#mail-general').href = mailto('ID tidak dijumpai - ' + id, 'Salam sejahtera,\n\nID saya (' + id + ') tidak dijumpai dalam sistem kehadiran. Mohon semak.\n\nNama:\nKelas:\n\nTerima kasih.');
+      $('#notice').hidden = false;
+      return;
+    }
+    render(j);
+  } catch (e) {
+    show('Tidak dapat berhubung dengan sistem. Semak internet dan cuba lagi.', 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Semak';
+  }
+}
+
+$('#f').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = $('#id').value.replace(/\s+/g, '').toUpperCase();
+  $('#id').value = id;
+  if (id) check(id);
+});
+try { const q = new URLSearchParams(location.search).get('id'); if (q) { $('#id').value = q.toUpperCase(); check(q); } } catch (e) {}
+})();
+</script>
+</body>
+</html>
